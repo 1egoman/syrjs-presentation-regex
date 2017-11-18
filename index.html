@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+
+			.title h1 {
+				font-family: monospace;
+				font-size: 80px;
+				color: #555;
+      }
+
+			.title h3 {
+				font-family: monospace;
+				color: #555;
+        padding-top: 20px;
+      }
+
+      .hl { background-color: yellow; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle, title
+
+# /Regex/
+
+#### By Ryan Gaus
+
+---
+
+# Agenda
+
+1. What are regular expressions?
+2. How can I use regular expressions in javascript?
+3. Some novel uses for regular expressions.
+
+---
+# A problem
+
+### Give me every word that starts with <code class="hl">pe</code> in the phrase:
+<br/>
+
+<code>Peter piper peeled a peck of pickled peppers</code>
+
+---
+# A problem
+
+### Give me every word that starts with <code class="hl">pe</code> in the phrase:
+<br/>
+
+<code>
+  <span class="hl">Pe</span>ter piper
+  <span class="hl">pe</span>eled a
+  <span class="hl">pe</span>ck of pickled
+  <span class="hl">pe</span>ppers
+</code>
+
+<div style="position: relative; top: -14px;">
+  <div style="height: 2px; width: 50px; background-color: red; position: absolute; left: 0px;"></div>
+  <div style="height: 2px; width: 60px; background-color: red; position: absolute; left: 120px;"></div>
+  <div style="height: 2px; width: 40px; background-color: red; position: absolute; left: 210px;"></div>
+  <div style="height: 2px; width: 70px; background-color: red; position: absolute; left: 370px;"></div>
+</div>
+
+---
+# A problem
+
+### Give me every word that starts with <code class="hl">pe</code> in the phrase:
+<br/>
+
+<code>
+  <span class="hl">Pe</span>ter piper
+  <span class="hl">pe</span>eled a
+  <span class="hl">pe</span>ck of pickled
+  <span class="hl">pe</span>ppers
+</code>
+
+<div style="position: relative; top: -14px;">
+  <div style="height: 2px; width: 50px; background-color: red; position: absolute; left: 0px;"></div>
+  <div style="height: 2px; width: 60px; background-color: red; position: absolute; left: 120px;"></div>
+  <div style="height: 2px; width: 40px; background-color: red; position: absolute; left: 210px;"></div>
+  <div style="height: 2px; width: 70px; background-color: red; position: absolute; left: 370px;"></div>
+</div>
+
+<br/>
+<br/>
+`= ['Peter', 'peeled', 'peck', 'peppers']`
+
+---
+### Give me every word that starts with <code class="hl">pe</code> in the phrase:
+
+<code>
+  <span class="hl">Pe</span>ter piper
+  <span class="hl">pe</span>eled a
+  <span class="hl">pe</span>ck of pickled
+  <span class="hl">pe</span>ppers
+</code>
+
+<div style="position: relative; top: -14px;">
+  <div style="height: 2px; width: 50px; background-color: red; position: absolute; left: 0px;"></div>
+  <div style="height: 2px; width: 60px; background-color: red; position: absolute; left: 120px;"></div>
+  <div style="height: 2px; width: 40px; background-color: red; position: absolute; left: 210px;"></div>
+  <div style="height: 2px; width: 70px; background-color: red; position: absolute; left: 370px;"></div>
+</div>
+
+```javascript
+function findPeWordsInPhrase(phrase) {
+  const results = [];
+
+  for (let i = 0; i < phrase.length - 1; i++) {
+    // Is the character at the current index equal to `p`?
+    if (phrase[i].toLowerCase() === 'p') {
+      // Is the character at the next index equal to an `e`?
+      if (phrase[i + 1].toLowerCase() === 'e') {
+        // We've found a matching word. Search for the end of the word and return it.
+        for (let j = 0; j < phrase.length; j++) {
+          if (phrase[j] === ' ') {
+            // Found a word boundary, report end of word.
+            results.push(phrase.slice(i, j));
+
+            // Move i to the word boundary and keep searching afterwards.
+            i = j;
+            break;
+          }
+        }
+
+        // At the end of the phrase. The word boundary is the end of the phrase.
+        results.push(phrase.slice(i, phrase.length));
+      }
+    }
+  }
+}
+```
+
+---
+
+![https://s3.amazonaws.com/codementor_content/2015-Aug-week2/bug.jpg](https://s3.amazonaws.com/codementor_content/2015-Aug-week2/bug.jpg)
+
+
+- Off-by-one in both loops
+- Case insensitive search
+- Special logic for final word
+
+---
+# This is better.
+
+```javascript
+const PE_WORD_REGEX = /(^| )pe[A-Za-z]+( |$)/gi
+
+function findPeWordsInPhraseRedux(phrase) {
+  return phrase.match(PE_WORD_REGEX).map(i => i.trim());
+}
+```
+
+---
+class: center, middle, title
+## How is `ae#f*gs943^$` better????
+
+---
+class: center, middle, title
+## It's a bit confusing, but
+## learn a few rules.
+
+---
+class: middle
+## 1. "normal" characters match themselves.
+
+A regular expression of `/bar/` matches the string `bar` in <code>foo <span class="hl">bar</span> baz</code>
+
+---
+class: middle
+## 2. "fancy" characters need to be backslash-escaped
+
+These special characters are `\`, `^`, `$`, `.`, `|`, `?`, `*`, `*`, `+`, `(`, `)`, `[`, and `{`.
+
+# `/test\?/`
+
+A regular expression of `/test\?/` matches the string `test?` in <code>foo <span class="hl">test?</span> baz</code>
+
+---
+class: middle, title
+## 2. A "character class" matches any character or range of characters within.
+
+# `/ba[rz]/`
+
+A regular expression of `/ba[rz]/g` matches the string `bar` and the string `baz` in
+<code>foo <span class="hl">bar</span> <span class="hl">baz</span></code>
+
+Ranges: `/[A-Z]/` matches any character from A to Z.
+
+---
+class: middle, title
+## 3. A "group" allows a section to match one of a list of sub-expressions. (and more!)
+
+# `/foo (bar|baz)/`
+
+A regular expression of `/foo (bar|baz)/g` matches the string `foo bar` or the string `foo baz` in
+<code><span class="hl">foo bar</span> unrelated <span class="hl">foo baz</span></code>.
+
+---
+class: title
+## 4. Groups can be repeated with modifiers.
+
+- `?` - repeat expression zero or one time
+- `*` - repeat expression zero or more times
+- `+` - repeat expresson one or more times
+
+- `{n}` - repeat expression `n` times.
+- `{n,m}` repeat expression between `n` and `m` times (inclusive)
+
+### `/f?o{2}/`
+
+A regular expression of `/f?o{2}/g` matches the string `foo` or the string `oo` <br/> in
+<code><span class="hl">foo</span> sp<span class="hl">oo</span>n</code>.
+
+---
+class: title
+
+## You're most of the way there.
+
+### /(^| )pe[A-Za-z]+( |$ )/
+
+<br/>
+
+<code>
+  <span class="hl">Pe</span>ter piper
+  <span class="hl">pe</span>eled a
+  <span class="hl">pe</span>ck of pickled
+  <span class="hl">pe</span>ppers
+</code>
+
+<div style="position: relative; top: -14px;">
+  <div style="height: 2px; width: 50px; background-color: red; position: absolute; left: 0px;"></div>
+  <div style="height: 2px; width: 60px; background-color: red; position: absolute; left: 120px;"></div>
+  <div style="height: 2px; width: 40px; background-color: red; position: absolute; left: 210px;"></div>
+  <div style="height: 2px; width: 70px; background-color: red; position: absolute; left: 370px;"></div>
+</div>
+
+<br/>
+
+- `^` means "the start of the string"
+- `$` means "the end of the string"
+
+---
+
+# Agenda
+
+1. What are regular expressions?
+2. **How can I use regular expressions in javascript?**
+3. Some novel uses for regular expressions.
+
+---
+# In javascript
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
