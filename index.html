@@ -28,6 +28,8 @@
       }
 
       .hl { background-color: yellow; }
+
+      .strike { text-decoration: line-through; }
     </style>
   </head>
   <body>
@@ -263,8 +265,240 @@ class: title
 3. Some novel uses for regular expressions.
 
 ---
-# In javascript
+# Creating a Regular Expression
+<br/>
 
+## /regex/flags
+OR
+## new RegExp("regex", "flags")
+
+---
+# Flags
+
+- `g` - match `g`lobally (multiple times)
+- `i` - case `i`nsensitive (both upper and lower case)
+- `u` - `u`nicode (matches on variable length code points instead of bytes)
+
+--
+
+## `/foo/`
+A regular expression of `/foo/` matches **only** the first `foo` in
+<code><span class="hl">foo</span> foo</code>.
+
+## `/foo/g`
+A regular expression of `/foo/g` matches all occurrences `foo` in
+<code><span class="hl">foo</span> <span class="hl">foo</span></code>.
+
+---
+# Using Regular Expressions - Matching
+
+```javascript
+// Find all words that start with `pe`
+
+const phrase = 'Peter piper picked a peck of pickled peppers';
+console.log(phrase.match(/(^| )pe[A-Za-z]+( |$ )/gi) );
+```
+
+---
+# Using Regular Expressions - Splitting
+
+```javascript
+// Split a string on both a dash and an underscore.
+
+console.log( 'foo-bar_baz'.split(/[-_]/g) );
+// ['foo', 'bar', 'baz']
+```
+
+---
+# Using Regular Expressions - Replacing
+
+```javascript
+// Replace every holiday in the below phrase with the best holiday :)
+const phrase = `It's almost Christmas, but I look forward to Halloween and
+can't wait for it to be the 4th of July!`;
+const correctedPhrase = phrase.replace(
+  /(Christmas|Halloween|4th of July)/g,
+  "Ryan's birthday"
+);
+
+// "It's almost Ryan's birthday, but I look forward to Ryan's birthday and
+// can't wait for it to be the Ryan's birthday!"
+```
+
+---
+# Using Regular Expressions - does it match?
+
+```javascript
+const phrase = 'Foo Bar Baz';
+console.log( /foo/gi.test(phrase) );
+// true
+```
+(faster than `String.prototype.match`)
+
+---
+# Using Regular Expressions - groups
+
+```javascript
+const phrase = 'Foo Bar Baz';
+/(ba[rz])/gi.exec(phrase);
+```
+
+---
+# Other things to know
+
+- Regular expressions are slow
+- [Regex Pal](https://regexpal.com) is a great place to try out regular expressions.
+- There are way more to regular expressions than what's been presentated here!
+  - Check out [MDN's Regex guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions)
+
+---
+# More resources
+
+- [RegExp.prototype.exec](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec)
+- [String.prototype.search](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/search)
+- [String.prototype.replace](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace)
+- [String.prototype.split](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split)
+
+---
+
+# Agenda
+
+1. What are regular expressions?
+2. How can I use regular expressions in javascript?
+3. **Some novel uses for regular expressions.**
+
+---
+class: center, middle
+# Let's build something novel
+
+---
+class: center, middle
+## Let's build a programming language.
+
+---
+class: center, middle
+![http://s.quickmeme.com/img/15/1570a5b7f60e21e85e4b29e3c386597cf655388bf4aeab211bc5b85878a4a996.jpg](http://s.quickmeme.com/img/15/1570a5b7f60e21e85e4b29e3c386597cf655388bf4aeab211bc5b85878a4a996.jpg)
+
+---
+
+# Building a Parser
+
+`STRING` &nbsp;&nbsp; `/^[A-Za-z]+/`
+<br/>
+<br/>
+`INTEGER` &nbsp;&nbsp; `/^[0-9]+/`
+
+--
+<br/>
+<br/>
+<br/>
+<pre>
+  text 123 more text 456
+</pre>
+
+```javascript
+Output = []
+```
+
+---
+# Building a Parser
+
+`STRING` &nbsp;&nbsp; `/^[A-Za-z]+/`
+<br/>
+<br/>
+.strike[`INTEGER` &nbsp;&nbsp; `/^[0-9]+/`]
+<br/>
+<br/>
+<br/>
+<pre>
+  <span class="hl">text</span>&nbsp;123 more text 456
+</pre>
+
+```javascript
+Output = []
+```
+
+---
+# Building a Parser
+
+`STRING` &nbsp;&nbsp; `/^[A-Za-z]+/`
+<br/>
+<br/>
+.strike[`INTEGER` &nbsp;&nbsp; `/^[0-9]+/`]
+<br/>
+<br/>
+<br/>
+<pre>
+  123 more text 456
+</pre>
+
+```javascript
+Output = ['text']
+```
+
+---
+# Building a Parser
+
+.strike[`STRING` &nbsp;&nbsp; `/^[A-Za-z]+/`]
+<br/>
+<br/>
+`INTEGER` &nbsp;&nbsp; `/^[0-9]+/`
+<br/>
+<br/>
+<br/>
+<pre>
+  <span class="hl">123</span> more text 456
+</pre>
+
+```javascript
+Output = ['text']
+```
+
+---
+# Building a Parser
+
+.strike[`STRING` &nbsp;&nbsp; `/^[A-Za-z]+/`]
+<br/>
+<br/>
+`INTEGER` &nbsp;&nbsp; `/^[0-9]+/`
+<br/>
+<br/>
+<br/>
+<pre>
+  more text 456
+</pre>
+
+```javascript
+Output = ['text', 123]
+```
+
+---
+# Building a Parser
+
+`STRING` &nbsp;&nbsp; `/^[A-Za-z]+/`
+<br/>
+<br/>
+`INTEGER` &nbsp;&nbsp; `/^[0-9]+/`
+<br/>
+<br/>
+<br/>
+```javascript
+'text 123 more text 456' => ['text', 123, 'more', 'text', 456]
+```
+
+---
+# Let's build it.
+
+```javascript
+const ADD = /^\(\+ *(.+)\)/; // (+ MORE TOKENS IN HERE )
+const SUBTRACT = /^\(\- *(.+)\)/; // (- MORE TOKENS IN HERE )
+const MULTIPLY = /^\(\* *(.+)\)/; // (* MORE TOKENS IN HERE )
+const DIVIDE = /^\(\/ *(.+)\)/; // (/ MORE TOKENS IN HERE )
+const NUMBER = /^([0-9.]+)/; // 123
+
+const TOKENS = [ ADD, SUBTRACT, MULTIPLY, DIVIDE, NUMBER ];
+const TOKEN_NAMES = [ 'add', 'subtract', 'multiply', 'divide', 'number' ];
+```
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
